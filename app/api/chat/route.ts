@@ -14,6 +14,13 @@ export async function POST(request: NextRequest) {
     // Parse the request body
     const body = await request.json() as ChatRequest;
     
+    // Log the incoming request for debugging
+    console.log(`CHAT API REQUEST (${body.mode} mode):`, {
+      userId: body.userId,
+      message: body.messages[body.messages.length - 1]?.content,
+      hasProfile: !!body.userProfile,
+    });
+    
     // Validate the request
     if (!body.messages || !body.mode) {
       return new NextResponse(
@@ -22,16 +29,17 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Check if we have a user ID in the request
-    const userId = body.userId;
+    // Use the profile data passed in the request if available
+    let userProfileData = body.userProfile || null;
     
-    // Add user profile data if user is authenticated
-    let userProfileData = null;
-    if (userId) {
+    // If not available in the request but we have a userId, try to fetch it
+    if (!userProfileData && body.userId) {
       try {
-        const profileResponse = await getUserProfile(userId) as UserProfileResponse;
+        console.log(`Fetching profile for user ${body.userId} from database...`);
+        const profileResponse = await getUserProfile(body.userId) as UserProfileResponse;
         if (profileResponse.success) {
           userProfileData = profileResponse.data;
+          console.log('Successfully fetched user profile:', userProfileData);
         }
       } catch (profileError) {
         console.error('Error fetching user profile:', profileError);
@@ -41,7 +49,9 @@ export async function POST(request: NextRequest) {
     
     // Generate response from LLM
     const responseText = await generateLLMResponse({
-      ...body,
+      messages: body.messages,
+      mode: body.mode,
+      userId: body.userId,
       userProfile: userProfileData
     });
     

@@ -26,7 +26,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/firebase/authContext';
 import AuthModal from '@/components/auth/AuthModal';
 import { getUserProfile } from '@/lib/firebase/userProfile';
-import { themeColors } from '@/app/layout';
 
 type Message = {
   id: number;
@@ -194,6 +193,24 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
       // Determine the mode based on the title
       const mode = getModeFromTitle();
 
+      // Make sure we have the latest user profile data
+      let currentUserProfile = userProfile;
+      if (user && !currentUserProfile) {
+        try {
+          console.log("Fetching user profile for chat...");
+          const profileResponse = await getUserProfile(user.uid);
+          if (profileResponse.success) {
+            currentUserProfile = profileResponse.data;
+            console.log("Profile fetched successfully:", currentUserProfile);
+          }
+        } catch (error) {
+          console.error('Error fetching user profile for chat:', error);
+        }
+      }
+
+      // Debug log the profile data
+      console.log(`SENDING ${mode.toUpperCase()} REQUEST WITH PROFILE:`, JSON.stringify(currentUserProfile, null, 2));
+
       // Call the API
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -204,7 +221,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
           messages: formattedMessages,
           mode: mode,
           userId: user?.uid, // Include user ID if authenticated
-          userProfile: userProfile // Include user profile data if available
+          userProfile: currentUserProfile // Include user profile data if available
         }),
       });
 
@@ -265,208 +282,227 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
     setMessages(prev => [...prev, welcomeMessage]);
   };
 
-  // determine the theme color based on title (for consistency)
-  const getThemeColor = () => {
-    switch(title.toLowerCase()) {
-      case 'fitness coach':
-        return themeColors.fitness;
-      case 'career coach':
-        return themeColors.career;
-      case 'financial coach':
-        return themeColors.finance;
-      case 'mental wellbeing coach':
-        return themeColors.mental;
-      default:
-        return accentColor;
-    }
-  };
-  const themeColor = getThemeColor();
-
   return (
-    <Container maxWidth="xl" disableGutters>
-      <Grid container spacing={0} sx={{ height: '100vh' }}>
-        {/* Sidebar */}
-        {!isMobile && (
-          <Grid item xs={12} md={3} lg={3} 
-            sx={{ 
-              bgcolor: 'background.paper',
-              p: 3,
-              borderRight: '1px solid',
-              borderColor: 'divider',
-              height: '100%',
-              overflowY: 'auto'
-            }}
-          >
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h5" fontWeight="bold" gutterBottom>
-                {title}
-              </Typography>
-              <Typography variant="body1" color="text.secondary" paragraph>
-                {longDescription}
-              </Typography>
-              
-              <Box sx={{ mt: 3, mb: 2 }}>
-                <Typography variant="h6" fontWeight="medium" gutterBottom>
-                  Benefits:
-                </Typography>
-                <List sx={{ listStyleType: 'disc', pl: 2 }}>
-                  {benefits.map((benefit, index) => (
-                    <ListItem key={index} sx={{ display: 'list-item', p: 0.5 }}>
-                      <Typography variant="body2">{benefit}</Typography>
-                    </ListItem>
-                  ))}
-                </List>
-              </Box>
-            </Box>
-            
-            <Box>
-              <Typography variant="h6" fontWeight="medium" gutterBottom>
-                Try asking:
-              </Typography>
-              {suggestedPrompts.map((prompt, index) => (
-                <Card 
-                  key={index} 
-                  variant="outlined" 
-                  sx={{ 
-                    mb: 2, 
-                    cursor: 'pointer',
-                    '&:hover': { 
-                      borderColor: themeColor,
-                      boxShadow: '0 4px 8px rgba(0,0,0,0.05)' 
-                    } 
-                  }}
-                  onClick={() => handleSuggestedPrompt(prompt)}
-                >
-                  <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                    <Typography variant="body2">{prompt}</Typography>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-          </Grid>
-        )}
-        
-        {/* Main Chat Area */}
-        <Grid item xs={12} md={9} lg={9} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-          {/* Header */}
+    <Box 
+      sx={{ 
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        bgcolor: '#f7f9fc'
+      }}
+    >
+      {/* Auth Modal */}
+      <AuthModal 
+        open={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+        onAuthSuccess={handleAuthSuccess}
+      />
+      
+      <Box 
+        sx={{ 
+          p: 2, 
+          borderBottom: '1px solid rgba(0,0,0,0.08)',
+          bgcolor: '#fff',
+          zIndex: 10,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.03)'
+        }}
+      >
+        <Button 
+          startIcon={<ArrowBackIcon />} 
+          onClick={navigateHome}
+          sx={{
+            fontWeight: 'medium',
+            color: 'text.primary'
+          }}
+        >
+          Back to Home
+        </Button>
+      </Box>
+      
+      <Box sx={{ 
+        flexGrow: 1, 
+        display: 'flex', 
+        flexDirection: { xs: 'column', md: 'row' },
+        height: 'calc(100vh - 60px)' // subtract header height
+      }}>
+        {/* Left sidebar - About section */}
+        <Box 
+          sx={{ 
+            width: { xs: '100%', md: '32%' },
+            height: { xs: 'auto', md: '100%' },
+            p: 3,
+            bgcolor: '#fff',
+            borderRight: '1px solid rgba(0,0,0,0.08)',
+            overflowY: 'auto',
+            boxShadow: { xs: 'none', md: '4px 0 12px rgba(0,0,0,0.03)' },
+            zIndex: 5,
+            display: { xs: isMobile && messages.length > 0 ? 'none' : 'block', md: 'block' }
+          }}
+        >
           <Box 
             sx={{ 
-              p: 2, 
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-              bgcolor: 'background.paper'
+              display: 'flex', 
+              alignItems: 'center', 
+              mb: 3,
+              pb: 3,
+              borderBottom: '1px solid rgba(0,0,0,0.08)'
             }}
           >
-            <IconButton 
-              onClick={() => router.push('/')}
-              sx={{ mr: 1 }}
-              aria-label="back to dashboard"
-            >
-              <ArrowBackIcon />
-            </IconButton>
-            
             <Avatar 
               sx={{ 
-                bgcolor: themeColor, 
-                mr: 2,
-                width: 36,
-                height: 36
+                bgcolor: accentColor, 
+                mr: 2, 
+                width: 48, 
+                height: 48,
+                fontSize: '1.5rem',
+                boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
               }}
             >
               {icon}
             </Avatar>
-            
-            <Box>
-              <Typography variant="h6" component="h1">
-                {title}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {description}
-              </Typography>
-            </Box>
+            <Typography variant="h5" fontWeight="bold" color="text.primary">
+              {title}
+            </Typography>
           </Box>
           
-          {/* Messages area */}
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              mb: 3,
+              color: 'text.primary',
+              fontWeight: 'medium'
+            }}
+          >
+            {description}
+          </Typography>
+
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              mb: 3,
+              color: 'text.primary'
+            }}
+          >
+            {longDescription}
+          </Typography>
+
+          <Typography variant="h6" fontWeight="bold" sx={{ mb: 1, color: 'text.primary' }}>
+            Benefits
+          </Typography>
+          <List disablePadding sx={{ mb: 3 }}>
+            {benefits.map((benefit, index) => (
+              <ListItem 
+                key={index}
+                disablePadding
+                sx={{ 
+                  mb: 1,
+                  display: 'flex',
+                  alignItems: 'flex-start'
+                }}
+              >
+                <Box component="span" sx={{ mr: 1, color: accentColor, fontSize: '1.2rem' }}>•</Box>
+                <Typography variant="body2" color="text.primary">
+                  {benefit}
+                </Typography>
+              </ListItem>
+            ))}
+          </List>
+
+          <Typography variant="h6" fontWeight="bold" sx={{ mb: 1, color: 'text.primary' }}>
+            Try asking about
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {suggestedPrompts.map((prompt, index) => (
+              <Button
+                key={index}
+                variant="outlined"
+                size="small"
+                onClick={() => handleSuggestedPrompt(prompt)}
+                sx={{ 
+                  borderRadius: '50px',
+                  borderColor: 'rgba(0,0,0,0.12)', 
+                  color: 'text.primary',
+                  '&:hover': {
+                    borderColor: accentColor,
+                    bgcolor: `${accentColor}10`,
+                    color: accentColor
+                  },
+                  textTransform: 'none',
+                  fontWeight: 'medium',
+                  py: 0.6
+                }}
+              >
+                {prompt}
+              </Button>
+            ))}
+          </Box>
+        </Box>
+        
+        {/* Right side - Chat interface */}
+        <Box
+          sx={{ 
+            width: { xs: '100%', md: '68%' },
+            height: { xs: isMobile ? 'calc(100vh - 60px - 300px)' : '100%', md: '100%' },
+            display: 'flex', 
+            flexDirection: 'column',
+            overflow: 'hidden',
+            bgcolor: '#f7f9fc',
+            position: 'relative'
+          }}
+        >
+          {/* Chat header */}
+          <Box 
+            sx={{ 
+              p: 2, 
+              borderBottom: '1px solid rgba(0,0,0,0.08)',
+              bgcolor: '#fff',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+            }}
+          >
+            <Typography variant="h6" fontWeight="bold" color="text.primary">
+              {title} Coach
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ opacity: 0.8 }}>
+              Ask me anything about {title.toLowerCase()}
+            </Typography>
+          </Box>
+          
+          {/* Chat messages area */}
           <Box 
             sx={{ 
               flexGrow: 1, 
-              p: 2, 
               overflowY: 'auto',
-              bgcolor: theme.palette.mode === 'light' ? '#f8f9fa' : 'background.paper',
+              p: 3,
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              gap: 2,
+              '&::-webkit-scrollbar': {
+                width: '8px',
+                backgroundColor: 'transparent',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: 'rgba(0,0,0,0.1)',
+                borderRadius: '8px',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                backgroundColor: 'rgba(0,0,0,0.2)',
+              }
             }}
-            ref={messagesEndRef}
           >
-            {/* Welcome message */}
-            {messages.length === 0 && (
-              <Box sx={{ textAlign: 'center', my: 4 }}>
-                <Avatar 
-                  sx={{ 
-                    bgcolor: themeColor, 
-                    width: 56, 
-                    height: 56,
-                    mx: 'auto',
-                    mb: 2
-                  }}
-                >
-                  {icon}
-                </Avatar>
-                <Typography variant="h5" gutterBottom>
-                  Welcome to your {title}
-                </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: '600px', mx: 'auto' }}>
-                  {longDescription}
-                </Typography>
-                
-                <Box 
-                  sx={{ 
-                    display: 'flex', 
-                    flexWrap: 'wrap', 
-                    gap: 1, 
-                    justifyContent: 'center',
-                    maxWidth: '700px',
-                    mx: 'auto'
-                  }}
-                >
-                  {suggestedPrompts.map((prompt, index) => (
-                    <Button 
-                      key={index}
-                      variant="outlined" 
-                      size="small"
-                      onClick={() => handleSuggestedPrompt(prompt)}
-                      sx={{ 
-                        borderColor: 'divider',
-                        color: 'text.primary',
-                        '&:hover': { 
-                          borderColor: themeColor,
-                          bgcolor: 'rgba(0,0,0,0.04)'
-                        }
-                      }}
-                    >
-                      {prompt}
-                    </Button>
-                  ))}
-                </Box>
-              </Box>
-            )}
-            
-            {/* Chat messages */}
             {messages.map((message) => (
-              <Box 
+              <Box
                 key={message.id}
-                sx={{ 
-                  display: 'flex', 
+                sx={{
+                  display: 'flex',
                   justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
-                  mb: 2 
+                  mb: 2
                 }}
               >
                 {message.sender === 'bot' && (
                   <Avatar 
                     sx={{ 
-                      bgcolor: themeColor, 
+                      bgcolor: accentColor, 
                       width: 40, 
                       height: 40,
                       mr: 1,
@@ -482,27 +518,124 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
                 <Paper
                   elevation={0}
                   sx={{
-                    p: 2,
                     maxWidth: '80%',
-                    bgcolor: message.sender === 'user' ? themeColor : '#fff',
-                    color: message.sender === 'user' ? '#fff' : 'text.primary',
+                    p: 2,
+                    bgcolor: message.sender === 'user' ? accentColor : '#fff',
+                    color: message.sender === 'user' ? 'white' : 'text.primary',
                     borderRadius: message.sender === 'user' 
                       ? '20px 4px 20px 20px' 
                       : '4px 20px 20px 20px',
-                    boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-                    '& a': {
-                      color: message.sender === 'user' ? '#fff' : themeColor,
-                      textDecoration: 'underline',
-                      '&:hover': {
-                        textDecoration: 'none'
-                      }
-                    }
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
                   }}
                 >
-                  <Typography variant="body1" component="div" sx={{ whiteSpace: 'pre-wrap' }}>
-                    {message.text}
+                  {message.sender === 'bot' ? (
+                    <Box sx={{ 
+                      '& p': { my: 1 },
+                      '& ul, & ol': { pl: 2, my: 1 },
+                      '& li': { mb: 0.5 },
+                      '& h3, & h4': { mt: 2, mb: 1, fontWeight: 'bold' },
+                      '& hr': { my: 2, borderColor: 'rgba(0,0,0,0.1)' }
+                    }}>
+                      {message.text.split('\n').map((line, i) => {
+                        // Handle headings (###)
+                        if (line.startsWith('###')) {
+                          return (
+                            <Typography key={i} variant="h6" sx={{ mt: 2, mb: 1, fontWeight: 'bold' }}>
+                              {line.replace(/^###\s*/, '')}
+                            </Typography>
+                          );
+                        }
+                        
+                        // Handle headings (##)
+                        if (line.startsWith('##')) {
+                          return (
+                            <Typography key={i} variant="h5" sx={{ mt: 2, mb: 1, fontWeight: 'bold' }}>
+                              {line.replace(/^##\s*/, '')}
+                            </Typography>
+                          );
+                        }
+                        
+                        // Handle horizontal rules
+                        if (line.startsWith('---')) {
+                          return <hr key={i} style={{ margin: '16px 0', border: 'none', borderTop: '1px solid rgba(0,0,0,0.1)' }} />;
+                        }
+                        
+                        // Handle bullet points
+                        if (line.trim().startsWith('*') || line.trim().startsWith('-')) {
+                          return (
+                            <Typography component="div" key={i} variant="body1" sx={{ ml: 2, display: 'flex', alignItems: 'flex-start' }}>
+                              <span style={{ marginRight: '8px', minWidth: '16px', display: 'inline-block' }}>•</span>
+                              <span dangerouslySetInnerHTML={{ 
+                                __html: line.replace(/^\s*[\*\-]\s*/, '')
+                                  // Convert markdown bold to HTML bold
+                                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                              }} />
+                            </Typography>
+                          );
+                        }
+                        
+                        // Handle numbered lists
+                        if (/^\s*\d+\.\s/.test(line)) {
+                          const number = line.match(/^\s*(\d+)\.\s/)?.[1] || '';
+                          return (
+                            <Typography component="div" key={i} variant="body1" sx={{ ml: 2, display: 'flex', alignItems: 'flex-start' }}>
+                              <span style={{ marginRight: '8px', minWidth: '16px', display: 'inline-block' }}>{number}.</span>
+                              <span dangerouslySetInnerHTML={{ 
+                                __html: line.replace(/^\s*\d+\.\s*/, '')
+                                  // Convert markdown bold to HTML bold
+                                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                              }} />
+                            </Typography>
+                          );
+                        }
+                        
+                        // Handle regular text with bold formatting
+                        if (line.trim()) {
+                          return (
+                            <Typography key={i} variant="body1" paragraph={true} sx={{ my: 0.5 }}>
+                              <span dangerouslySetInnerHTML={{ 
+                                __html: line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') 
+                              }} />
+                            </Typography>
+                          );
+                        }
+                        
+                        // Handle empty lines as spacing
+                        return <Box key={i} sx={{ height: '0.5rem' }} />;
+                      })}
+                    </Box>
+                  ) : (
+                    <Typography variant="body1" sx={{ fontWeight: 400 }}>
+                      {message.text}
+                    </Typography>
+                  )}
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      display: 'block', 
+                      mt: 1,
+                      opacity: 0.7,
+                      color: message.sender === 'user' ? 'rgba(255,255,255,0.9)' : 'text.secondary'
+                    }}
+                  >
+                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </Typography>
                 </Paper>
+                
+                {message.sender === 'user' && (
+                  <Avatar 
+                    sx={{ 
+                      bgcolor: '#404040', 
+                      width: 40, 
+                      height: 40,
+                      ml: 1,
+                      mt: 0.5,
+                      boxShadow: '0 3px 8px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    U
+                  </Avatar>
+                )}
               </Box>
             ))}
             
@@ -517,7 +650,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
               >
                 <Avatar 
                   sx={{ 
-                    bgcolor: themeColor, 
+                    bgcolor: accentColor, 
                     width: 40, 
                     height: 40,
                     mr: 1,
@@ -540,7 +673,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
                     boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
                   }}
                 >
-                  <CircularProgress size={20} sx={{ color: themeColor }} />
+                  <CircularProgress size={20} sx={{ color: accentColor }} />
                   <Typography variant="body2" color="text.primary">Thinking...</Typography>
                 </Paper>
               </Box>
@@ -564,92 +697,87 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
               </Box>
             )}
             
-            {/* Invisible element to scroll to */}
             <div ref={messagesEndRef} />
           </Box>
           
-          {/* Input area */}
+          {/* Chat input area */}
           <Box 
             sx={{ 
               p: 2, 
-              borderTop: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'background.paper',
-              position: 'relative'
+              borderTop: '1px solid rgba(0,0,0,0.08)',
+              bgcolor: '#fff',
+              boxShadow: '0 -2px 10px rgba(0,0,0,0.05)'
             }}
           >
-            {!user && !loading && (
-              <Box 
-                sx={{ 
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  bgcolor: 'rgba(255,255,255,0.9)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 10,
-                  p: 2
-                }}
-              >
-                <Typography variant="body1" sx={{ mb: 2, textAlign: 'center' }}>
-                  Please sign in to continue your conversation
-                </Typography>
-                <Button 
-                  variant="contained" 
-                  onClick={() => setShowAuthModal(true)}
-                  sx={{ bgcolor: themeColor, '&:hover': { bgcolor: themeColor } }}
-                >
-                  Sign In or Register
-                </Button>
-              </Box>
-            )}
-  
-            <Box component="form" onSubmit={handleSendMessage} sx={{ display: 'flex', gap: 1 }}>
-              <TextField
+            {!user ? (
+              <Button
                 fullWidth
-                placeholder={`Message your ${title.toLowerCase()}...`}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                variant="outlined"
-                size="small"
-                disabled={isLoading || !user}
-                sx={{ 
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '24px',
-                    pr: 1,
-                    bgcolor: 'background.default'
+                variant="contained"
+                onClick={() => setShowAuthModal(true)}
+                sx={{
+                  py: 1.5,
+                  bgcolor: accentColor,
+                  '&:hover': {
+                    bgcolor: theme.palette.augmentColor({ color: { main: accentColor } }).dark
                   }
                 }}
-                InputProps={{
-                  endAdornment: (
-                    <IconButton
-                      color="primary"
-                      type="submit"
-                      disabled={!input.trim() || isLoading || !user}
-                      sx={{ 
-                        bgcolor: themeColor, 
-                        color: '#fff',
-                        '&:hover': { bgcolor: themeColor },
-                        '&.Mui-disabled': { bgcolor: 'action.disabledBackground', color: 'action.disabled' }
-                      }}
-                    >
-                      <SendIcon fontSize="small" />
-                    </IconButton>
-                  ),
-                }}
-              />
-            </Box>
+              >
+                Sign in to Start Chatting
+              </Button>
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Type your message..."
+                  value={input}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  disabled={isLoading}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '50px',
+                      pr: 1,
+                      bgcolor: '#f7f9fc'
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(0,0,0,0.1)'
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(0,0,0,0.2)'
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: accentColor
+                    }
+                  }}
+                  InputProps={{
+                    endAdornment: (
+                      <IconButton 
+                        color="primary" 
+                        onClick={() => handleSendMessage()}
+                        disabled={!input.trim() || isLoading}
+                        sx={{ 
+                          bgcolor: input.trim() && !isLoading ? accentColor : 'transparent',
+                          color: input.trim() && !isLoading ? 'white' : 'inherit',
+                          '&:hover': {
+                            bgcolor: input.trim() && !isLoading ? accentColor : 'transparent',
+                            opacity: input.trim() && !isLoading ? 0.9 : 1
+                          },
+                          transition: 'all 0.2s ease',
+                          boxShadow: input.trim() && !isLoading ? '0 3px 8px rgba(0,0,0,0.15)' : 'none'
+                        }}
+                      >
+                        {isLoading ? <CircularProgress size={24} sx={{ color: 'inherit' }} /> : <SendIcon />}
+                      </IconButton>
+                    )
+                  }}
+                />
+              </Box>
+            )}
           </Box>
-        </Grid>
-      </Grid>
-      
-      {/* Auth Modal */}
-      <AuthModal open={showAuthModal} onClose={() => setShowAuthModal(false)} />
-    </Container>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

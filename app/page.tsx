@@ -20,7 +20,6 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/firebaseConfig';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { User } from 'firebase/auth';
-import { themeColors } from './layout';
 
 // Navbar with scroll effect
 function NavBar() {
@@ -82,8 +81,8 @@ function NavBar() {
     <Box sx={{ width: 250, pt: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <SmartToyIcon sx={{ color: themeColors.primary, mr: 1 }} />
-          <Typography variant="h6" fontWeight="bold" color="primary">AI Coach</Typography>
+          <SmartToyIcon sx={{ color: '#3f51b5', mr: 1 }} />
+          <Typography variant="h6" fontWeight="bold" color="#3f51b5">AI Coach</Typography>
         </Box>
         <IconButton onClick={handleDrawerToggle}>
           <CloseIcon />
@@ -98,55 +97,77 @@ function NavBar() {
             sx={{ 
               py: 1.5,
               '&:hover': {
-                bgcolor: 'rgba(250, 204, 21, 0.05)'
-              }
+                bgcolor: 'rgba(63, 81, 181, 0.05)'
+              },
+              cursor: 'pointer'
             }}
           >
             <ListItemText 
               primary={item.name} 
               sx={{ 
-                '& .MuiListItemText-primary': { 
-                  fontWeight: '500'
+                '& .MuiListItemText-primary': {
+                  fontWeight: 'medium'
                 }
-              }} 
+              }}
             />
           </ListItem>
         ))}
-      </List>
-      <Divider />
-      <List>
-        {!user && !loading && (
+        {!user ? (
           <ListItem 
             onClick={handleAuthClick}
             sx={{ 
               py: 1.5,
               '&:hover': {
-                bgcolor: 'rgba(250, 204, 21, 0.05)'
-              }
+                bgcolor: 'rgba(63, 81, 181, 0.05)'
+              },
+              cursor: 'pointer'
             }}
           >
             <ListItemText 
-              primary="Sign In" 
+              primary="Sign In / Sign Up" 
               sx={{ 
-                '& .MuiListItemText-primary': { 
-                  fontWeight: '500'
+                '& .MuiListItemText-primary': {
+                  fontWeight: 'medium'
                 }
-              }} 
+              }}
             />
           </ListItem>
-        )}
-        {user && (
+        ) : (
           <>
-            <ListItem sx={{ py: 1 }}>
+            <ListItem 
+              sx={{ 
+                py: 1.5,
+                '&:hover': {
+                  bgcolor: 'rgba(63, 81, 181, 0.05)'
+                },
+                cursor: 'pointer'
+              }}
+            >
               <ListItemText 
-                primary={getUserEmail(user)} 
-                secondary="Account" 
+                primary={
+                  <Box 
+                    sx={{ 
+                      p: 2, 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1,
+                      borderRadius: '8px',
+                      bgcolor: 'rgba(63, 81, 181, 0.1)',
+                      color: '#3f51b5',
+                      mb: 2
+                    }}
+                  >
+                    <AccountCircleIcon />
+                    <Typography variant="body2" fontWeight="medium" noWrap>
+                      {getUserEmail(user)}
+                    </Typography>
+                  </Box>
+                } 
                 sx={{ 
-                  '& .MuiListItemText-primary': { 
-                    fontWeight: '500',
-                    fontSize: '0.9rem'
+                  '& .MuiListItemText-primary': {
+                    fontWeight: 'medium'
                   }
-                }} 
+                }}
               />
             </ListItem>
             <ListItem 
@@ -154,17 +175,18 @@ function NavBar() {
               sx={{ 
                 py: 1.5,
                 '&:hover': {
-                  bgcolor: 'rgba(250, 204, 21, 0.05)'
-                }
+                  bgcolor: 'rgba(63, 81, 181, 0.05)'
+                },
+                cursor: 'pointer'
               }}
             >
               <ListItemText 
-                primary="Profile" 
+                primary="My Profile" 
                 sx={{ 
-                  '& .MuiListItemText-primary': { 
-                    fontWeight: '500'
+                  '& .MuiListItemText-primary': {
+                    fontWeight: 'medium'
                   }
-                }} 
+                }}
               />
             </ListItem>
             <ListItem 
@@ -172,17 +194,18 @@ function NavBar() {
               sx={{ 
                 py: 1.5,
                 '&:hover': {
-                  bgcolor: 'rgba(250, 204, 21, 0.05)'
-                }
+                  bgcolor: 'rgba(63, 81, 181, 0.05)'
+                },
+                cursor: 'pointer'
               }}
             >
               <ListItemText 
-                primary="Logout" 
+                primary="Sign Out" 
                 sx={{ 
-                  '& .MuiListItemText-primary': { 
-                    fontWeight: '500'
+                  '& .MuiListItemText-primary': {
+                    fontWeight: 'medium'
                   }
-                }} 
+                }}
               />
             </ListItem>
           </>
@@ -192,99 +215,157 @@ function NavBar() {
   );
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <>
+      <AuthModal 
+        open={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)} 
+        onAuthSuccess={() => setAuthModalOpen(false)}
+      />
       <AppBar 
         position="fixed" 
-        sx={{ 
-          boxShadow: trigger ? '0 4px 20px rgba(0, 0, 0, 0.1)' : 'none',
-          bgcolor: 'background.paper',
-          borderBottom: trigger ? 'none' : '1px solid',
-          borderColor: 'divider',
-          transition: 'all 0.3s ease-in-out'
-        }}
-        color="inherit"
+        color="transparent" 
         elevation={0}
+        sx={{
+          bgcolor: trigger ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
+          boxShadow: trigger ? '0 4px 20px rgba(0,0,0,0.08)' : 'none',
+          transition: 'all 0.3s ease',
+          backdropFilter: trigger ? 'blur(10px)' : 'none',
+        }}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <SmartToyIcon sx={{ color: themeColors.primary, mr: 1, fontSize: '1.8rem' }} />
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{ flexGrow: 1, fontWeight: 'bold', color: themeColors.primary, display: 'flex', alignItems: 'center' }}
-            >
-              AI Life Coach
-            </Typography>
-          </Box>
-          
-          <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center' }}>
-            {navItems.map((item) => (
-              <Button
-                key={item.name}
-                color="inherit"
-                onClick={() => handleNavClick(item.path)}
-                sx={{ mx: 1, fontWeight: '500' }}
+        <Container maxWidth="lg">
+          <Toolbar disableGutters sx={{ py: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+              <SmartToyIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1, color: trigger ? '#3f51b5' : '#3f51b5' }} />
+              <Typography
+                variant="h6"
+                noWrap
+                sx={{
+                  mr: 2,
+                  display: { xs: 'none', md: 'flex' },
+                  fontWeight: 'bold',
+                  color: trigger ? '#3f51b5' : '#3f51b5',
+                }}
               >
-                {item.name}
-              </Button>
-            ))}
-            
-            {!user && !loading && (
-              <Button
-                variant="contained"
-                onClick={handleAuthClick}
-                sx={{ ml: 2 }}
+                AI Life Coach
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+              <IconButton
+                size="large"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ color: trigger ? '#333' : '#3f51b5' }}
               >
-                Sign In
-              </Button>
-            )}
+                <MenuIcon />
+              </IconButton>
+            </Box>
             
-            {user && (
-              <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
+            <Box sx={{ display: { xs: 'flex', md: 'none' }, flexGrow: 1, alignItems: 'center' }}>
+              <SmartToyIcon sx={{ mr: 1, color: trigger ? '#3f51b5' : '#3f51b5' }} />
+              <Typography
+                variant="h6"
+                noWrap
+                sx={{
+                  fontWeight: 'bold',
+                  color: trigger ? '#3f51b5' : '#3f51b5',
+                }}
+              >
+                AI Coach
+              </Typography>
+            </Box>
+            
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+              {navItems.map((item) => (
                 <Button
-                  onClick={handleProfileClick}
-                  startIcon={<AccountCircleIcon />}
-                  sx={{ mr: 1, textTransform: 'none' }}
+                  key={item.name}
+                  onClick={() => handleNavClick(item.path)}
+                  sx={{
+                    color: trigger ? 'text.primary' : item.name === 'Home' ? '#3f51b5' : '#3f51b5',
+                    fontWeight: 'medium',
+                    px: 2,
+                    '&:hover': {
+                      bgcolor: 'rgba(63, 81, 181, 0.08)',
+                    },
+                  }}
                 >
-                  Profile
+                  {item.name}
                 </Button>
-                <Button
-                  variant="outlined"
-                  onClick={handleLogout}
-                  size="small"
-                >
-                  Logout
-                </Button>
-              </Box>
-            )}
-          </Box>
-        </Toolbar>
+              ))}
+              
+              {!loading && (
+                !user ? (
+                  <Button
+                    variant="contained"
+                    onClick={handleAuthClick}
+                    sx={{ 
+                      ml: 2,
+                      bgcolor: '#3f51b5',
+                      '&:hover': { bgcolor: '#303f9f' },
+                      boxShadow: 'none'
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                ) : (
+                  <Box sx={{ ml: 2, display: 'flex', alignItems: 'center' }}>
+                    <Button
+                      sx={{ 
+                        color: trigger ? 'text.primary' : '#3f51b5',
+                        fontWeight: 'medium',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                      }}
+                      onClick={handleProfileClick}
+                    >
+                      <AccountCircleIcon />
+                      <Box 
+                        component="span" 
+                        sx={{ 
+                          maxWidth: '150px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          display: { xs: 'none', lg: 'inline' }
+                        }}
+                      >
+                        {getUserEmail(user)}
+                      </Box>
+                    </Button>
+                    <Button
+                      onClick={handleLogout}
+                      sx={{ 
+                        color: trigger ? 'text.secondary' : 'rgba(63, 81, 181, 0.7)',
+                        '&:hover': { bgcolor: 'rgba(63, 81, 181, 0.08)' }
+                      }}
+                    >
+                      Sign Out
+                    </Button>
+                  </Box>
+                )
+              )}
+            </Box>
+          </Toolbar>
+        </Container>
       </AppBar>
+      
       <Drawer
         variant="temporary"
         open={mobileOpen}
         onClose={handleDrawerToggle}
         ModalProps={{
-          keepMounted: true, // Better mobile performance
+          keepMounted: true,
         }}
         sx={{
-          display: { xs: 'block', sm: 'none' },
+          display: { xs: 'block', md: 'none' },
           '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 250 },
         }}
       >
         {drawer}
       </Drawer>
-      <Toolbar /> {/* Empty toolbar to push content below app bar */}
-    </Box>
+    </>
   );
 }
 

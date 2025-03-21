@@ -38,8 +38,8 @@ const Navbar = () => {
   };
 
   return (
-    <Box 
-      component="nav" 
+    <Box
+      component="nav"
       sx={{
         position: 'sticky',
         top: 0,
@@ -51,9 +51,9 @@ const Navbar = () => {
     >
       <Container maxWidth="lg">
         <Box
-      display="flex" 
-      justifyContent="space-between" 
-      alignItems="center" 
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
           py={2}
         >
           {/* Left Section - Logo */}
@@ -116,7 +116,7 @@ const Navbar = () => {
                     }}
                   >
                     {item.name}
-        </Typography>
+                  </Typography>
                 ))}
               </Box>
             </Fade>
@@ -199,7 +199,7 @@ const Navbar = () => {
           <Typography variant="h5" fontWeight="bold" color="white" sx={{ mb: 3 }}>
             <span style={{ color: '#facc15' }}>Coach</span>AI
           </Typography>
-      </Box>
+        </Box>
 
         <List>
           {menuItems.map((item, index) => (
@@ -247,7 +247,7 @@ const Navbar = () => {
           >
             Sign up
           </Button>
-      </Box>
+        </Box>
       </Drawer>
     </Box>
   );

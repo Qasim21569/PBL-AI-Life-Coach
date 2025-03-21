@@ -1,51 +1,58 @@
 # AI Life Coach
 
-A comprehensive AI-powered life coaching platform offering guidance in career development, fitness, finance, and mental wellbeing.
+A Next.js web application that provides AI-powered life coaching across different domains:
+
+- Career Guidance
+- Physical & Fitness Guidance
+- Financial/Investment Guidance
+- Mental/Therapy Guidance
 
 ## Features
 
-- **Career Coaching**: Professional development, job search, and career advancement strategies
-- **Fitness Coaching**: Personalized workout plans and health guidance
-- **Financial Coaching**: Budgeting, investment advice, and financial planning
-- **Mental Wellbeing**: Stress management and personal growth techniques
+- Modern, responsive UI with animations
+- Chat-based interface for interacting with AI coaches
+- Domain-specific AI coaching with tailored advice
+- Suggested prompts for easy conversation starters
+- Powered by Hugging Face's language models
 
-## Technology Stack
+## Getting Started
 
-- Next.js
-- React
-- Material UI
-- Firebase Authentication
-- Firebase Firestore
+### Prerequisites
 
-## Development
+- Node.js 18+ and npm installed on your machine
+- A Hugging Face account and API token
 
-To run the project locally:
+### Setup Instructions
 
-```bash
-# Install dependencies
-npm install
+1. Clone the repository
 
-# Run development server
-npm run dev
-```
+   ```bash
+   git clone <repository-url>
+   cd ai-life-coach
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+2. Install dependencies
 
-## Deployment
+   ```bash
+   npm install
+   ```
 
-This project is configured for GitHub Pages deployment through GitHub Actions. When changes are pushed to the `main` branch, the site will automatically build and deploy to the `gh-pages` branch.
+3. Set up your environment variables
 
-The live site can be accessed at: https://qasim21569.github.io/AI-Life-COach/
+   - Copy `.env.local.example` to `.env.local` (or create a new `.env.local` file)
+   - Get a Hugging Face API token from [https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
+   - Add your token to the `.env.local` file:
+     ```
+     HUGGING_FACE_API_TOKEN=your_token_here
+     ```
 
-## Local Build
+4. Start the development server
 
-To create a production build locally:
+   ```bash
+   npm run dev
+   ```
 
-```bash
-npm run build
-```
-
-This will generate static files in the `out` directory that can be deployed to any static hosting service.
+5. Open your browser and navigate to http://localhost:3000
 
 ## Hugging Face Integration
 
@@ -66,6 +73,13 @@ Recommended models for chatbot applications:
 - `/app/api` - Backend API routes
   - `/app/api/chat` - Chat API endpoint
   - `/app/api/llm` - LLM service for Hugging Face integration
+
+## Building for Production
+
+```bash
+npm run build
+npm run start
+```
 
 ## License
 

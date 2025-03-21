@@ -45,7 +45,12 @@ export default function ProfilePage() {
         if (success) {
           setProfileData(data);
         } else {
-          console.error('Error fetching profile:', error);
+          // This is normal for new users, so don't log as error
+          if (error === 'Profile not found') {
+            console.log('No profile found for new user, creating empty profile');
+          } else {
+            console.error('Error fetching profile:', error);
+          }
           // Create empty profile for new users
           setProfileData({});
         }

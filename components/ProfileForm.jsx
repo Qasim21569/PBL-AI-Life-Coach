@@ -14,13 +14,10 @@ import {
   Grid, 
   Paper,
   Divider,
-  TextareaAutosize,
-  useTheme
+  TextareaAutosize
 } from '@mui/material';
-import { themeColors } from '@/app/layout';
 
 const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
-  const theme = useTheme();
   const [formData, setFormData] = useState({
     name: initialData.name || '',
     age: initialData.age || '',
@@ -143,7 +140,7 @@ const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
   return (
     <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
       <Box component="form" onSubmit={handleSubmit}>
-        <Typography variant="h5" gutterBottom fontWeight="bold" color="primary">
+        <Typography variant="h5" gutterBottom fontWeight="bold" color="#3f51b5">
           Your Profile Information
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
@@ -153,7 +150,7 @@ const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
         <Grid container spacing={3}>
           {/* Personal Information Section */}
           <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom sx={{ mt: 1, color: 'primary.main' }}>
+            <Typography variant="h6" gutterBottom sx={{ mt: 1, color: '#3f51b5' }}>
               Personal Information
             </Typography>
             <Divider sx={{ mb: 2 }} />
@@ -225,7 +222,7 @@ const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
           
           {/* General Goals Section */}
           <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom sx={{ mt: 3, color: 'primary.main' }}>
+            <Typography variant="h6" gutterBottom sx={{ mt: 3, color: '#3f51b5' }}>
               General Goals & Interests
             </Typography>
             <Divider sx={{ mb: 2 }} />
@@ -254,7 +251,7 @@ const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
               <Button 
                 onClick={handleAddGoal}
                 variant="contained"
-                sx={{ ml: 1 }}
+                sx={{ ml: 1, bgcolor: '#3f51b5' }}
               >
                 Add
               </Button>
@@ -294,7 +291,7 @@ const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
               <Button 
                 onClick={handleAddInterest}
                 variant="contained"
-                sx={{ ml: 1 }}
+                sx={{ ml: 1, bgcolor: '#3f51b5' }}
               >
                 Add
               </Button>
@@ -313,7 +310,7 @@ const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
           
           {/* Fitness & Health Section */}
           <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom sx={{ mt: 3, color: themeColors.fitness }}>
+            <Typography variant="h6" gutterBottom sx={{ mt: 3, color: '#4caf50' }}>
               Fitness & Health
             </Typography>
             <Divider sx={{ mb: 2 }} />
@@ -359,7 +356,7 @@ const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
               <Button 
                 onClick={handleAddHealthCondition}
                 variant="contained"
-                sx={{ ml: 1, bgcolor: themeColors.fitness, '&:hover': { bgcolor: '#3d8b40' } }}
+                sx={{ ml: 1, bgcolor: '#4caf50' }}
               >
                 Add
               </Button>
@@ -378,7 +375,7 @@ const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
           
           {/* Financial Section */}
           <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom sx={{ mt: 3, color: themeColors.finance }}>
+            <Typography variant="h6" gutterBottom sx={{ mt: 3, color: '#ffc107' }}>
               Financial Information
             </Typography>
             <Divider sx={{ mb: 2 }} />
@@ -418,7 +415,7 @@ const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
               <Button 
                 onClick={handleAddFinancialGoal}
                 variant="contained"
-                sx={{ ml: 1, bgcolor: themeColors.finance, color: 'rgba(0,0,0,0.7)', '&:hover': { bgcolor: '#d4a106' } }}
+                sx={{ ml: 1, bgcolor: '#ffc107', color: 'rgba(0,0,0,0.7)' }}
               >
                 Add
               </Button>
@@ -437,7 +434,7 @@ const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
           
           {/* Mental Health Section */}
           <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom sx={{ mt: 3, color: themeColors.mental }}>
+            <Typography variant="h6" gutterBottom sx={{ mt: 3, color: '#9c27b0' }}>
               Mental Wellbeing
             </Typography>
             <Divider sx={{ mb: 2 }} />
@@ -465,7 +462,7 @@ const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
               <Button 
                 onClick={handleAddMentalHealthNeed}
                 variant="contained"
-                sx={{ ml: 1, bgcolor: themeColors.mental, '&:hover': { bgcolor: '#7b1fa2' } }}
+                sx={{ ml: 1, bgcolor: '#9c27b0' }}
               >
                 Add
               </Button>
@@ -490,9 +487,13 @@ const ProfileForm = ({ onSubmit, initialData = {}, isLoading = false }) => {
               disabled={isLoading}
               sx={{ 
                 mt: 4, 
+                bgcolor: '#3f51b5',
                 py: 1.5,
                 borderRadius: '8px',
                 fontWeight: 'bold',
+                '&:hover': {
+                  bgcolor: '#303f9f'
+                }
               }}
             >
               {isLoading ? 'Saving...' : 'Save Profile'}

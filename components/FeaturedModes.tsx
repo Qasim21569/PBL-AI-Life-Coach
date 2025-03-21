@@ -6,17 +6,17 @@ import { useRouter } from 'next/navigation';
 
 const modes = [
   {
-    title: 'Career Guidance',
-    description: 'Get advice and resources to boost your career path. From resume building to interview tips, we help you climb the career ladder.',
+    title: '🚀 Career Boosters',
+    description: '✨ Wanna crush that next interview or land your dream job? We\'ve got your back with resume hacks, killer tips, and guidance to make your career take off.',
     image: '/images/career.png',
-    icon: '💼',
+    icon: '🚀',
     path: '/career',
     color: '#3f51b5',
     bgGradient: 'linear-gradient(135deg, #3f51b5 0%, #7986cb 100%)'
   },
   {
-    title: 'Physical & Fitness Guidance',
-    description: 'Personalized fitness and physical well-being plans. Get workout routines, nutrition advice, and health tips tailored to your goals.',
+    title: '💪 Fit & Fab Vibes',
+    description: '🔥 Get your sweat on with custom workouts, nutrition hacks, and feel-good fitness tips. Whether you\'re aiming for beast mode or just wanna feel fab, we got you!',
     image: '/images/fitness.png',
     icon: '💪',
     path: '/fitness',
@@ -24,19 +24,19 @@ const modes = [
     bgGradient: 'linear-gradient(135deg, #4caf50 0%, #81c784 100%)'
   },
   {
-    title: 'Financial/Investment Guidance',
-    description: 'Plan your finances smartly and invest wisely. Learn about budgeting, saving strategies, and growing your wealth the right way.',
+    title: '💡 Smart Finances',
+    description: '📊 Take control of your money with expert tips on budgeting, saving, and investing. Build a secure and smarter financial future with confidence.',
     image: '/images/finance.png',
-    icon: '💰',
+    icon: '💡',
     path: '/finance',
     color: '#ffc107',
     bgGradient: 'linear-gradient(135deg, #ffc107 0%, #ffecb3 100%)'
   },
   {
-    title: 'Mental/Therapy Guidance',
-    description: 'Support your mental health with expert guidance. Discover techniques for stress management, mindfulness, and emotional well-being.',
+    title: '🌈 Mind Spa',
+    description: '🧘‍♀️ Your chill zone for stress relief, mindfulness, and emotional wellness. Recharge, refocus, and feel lighter with expert-backed mental health tips.',
     image: '/images/mental.png',
-    icon: '🧠',
+    icon: '🌈',
     path: '/mental',
     color: '#9c27b0',
     bgGradient: 'linear-gradient(135deg, #9c27b0 0%, #ce93d8 100%)'
@@ -62,12 +62,12 @@ const FeaturedModes = () => {
       }}
     >
       {modes.map((mode, index) => (
-        <Zoom 
-          in={true} 
+        <Zoom
+          in={true}
           style={{ transitionDelay: `${index * 150}ms` }}
           key={index}
         >
-          <Box 
+          <Box
             sx={{
               display: 'flex',
               height: '100%'
@@ -160,7 +160,7 @@ const FeaturedModes = () => {
                   {mode.title}
                 </Typography>
               </Box>
-              <CardContent 
+              <CardContent
                 className="card-content"
                 sx={{
                   flexGrow: 1,
@@ -215,7 +215,10 @@ const FeaturedModes = () => {
                   textAlign: 'center',
                 }}
               >
-                Start Coaching
+                {mode.title.includes('Career') ? '👉 Let\'s Level Up' : 
+                 mode.title.includes('Fit') ? '🏋️‍♀️ Get Moving' :
+                 mode.title.includes('Smart') ? '💰 Start Planning' : 
+                 '🌿 Relax & Recharge'}
               </Box>
             </Card>
           </Box>
